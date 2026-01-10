@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 import SkeletonCard from "./SkeletonCard";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./notfoundcomp.css";
 
 const ProductGrid = () => {
@@ -22,16 +22,19 @@ const ProductGrid = () => {
 
   const filterProduct = products.filter(
     (item) =>
-      (item.title.toLowerCase().includes(searchValue?.toLowerCase()) &&
+      (item.title
+        .toLowerCase()
+        .includes(searchValue ? searchValue.toLowerCase() : "") &&
         selectCategory === "") ||
-      item.category == selectCategory
+      item.category === selectCategory
   );
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
   const lastIndex = currentPage * itemsPerPage;
+  // console.log(lastIndex);
   const firstIndex = lastIndex - itemsPerPage;
-  const paginatedProduct = filterProduct.slice(firstIndex, lastIndex);
-  const totalPages = Math.ceil(filterProduct.length / itemsPerPage);
+  // console.log(firstIndex);
+  // console.log(filterProduct);
 
   useEffect(() => {
     fetch("https://fakestoreapi.com/products")
@@ -46,6 +49,10 @@ const ProductGrid = () => {
       .catch((err) => console.error(err));
     getAllCategory();
   }, []);
+  const paginatedProduct = filterProduct?.slice(firstIndex, lastIndex);
+  const totalPages = Math.ceil(filterProduct.length / itemsPerPage);
+  console.log(totalPages);
+  // console.log(paginatedProduct);
 
   return (
     <section className="container mx-auto px-4 pb-16">
@@ -59,9 +66,7 @@ const ProductGrid = () => {
             All
           </option>
           {category.map((items) => (
-            <option value={items}>
-              {items}
-            </option>
+            <option value={items}>{items}</option>
           ))}
         </select>
       </div>
@@ -87,13 +92,15 @@ const ProductGrid = () => {
       </div>
       <div className=" w-full flex items-center justify-center">
         {[...Array(totalPages).keys()].map((page) => (
-          <button
-            key={page + 1}
-            className="bg-stone-300 rounded pt-1 pl-3 pr-3 pb-1 mt-4 ml-2 cursor-pointer hover:bg-stone-400 transition-colors duration-500"
-            onClick={() => setCurrentPage(page + 1)}
-          >
-            {page + 1}
-          </button>
+          <Link to={`/shop`}>
+            <button
+              key={page + 1}
+              className="bg-stone-300 rounded pt-1 pl-3 pr-3 pb-1 mt-4 ml-2 cursor-pointer hover:bg-stone-400 transition-colors duration-500"
+              onClick={() => setCurrentPage(page + 1)}
+            >
+              {page + 1}
+            </button>
+          </Link>
         ))}
       </div>
     </section>
