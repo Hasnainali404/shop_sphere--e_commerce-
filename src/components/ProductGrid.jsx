@@ -31,10 +31,7 @@ const ProductGrid = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
   const lastIndex = currentPage * itemsPerPage;
-  // console.log(lastIndex);
   const firstIndex = lastIndex - itemsPerPage;
-  // console.log(firstIndex);
-  // console.log(filterProduct);
 
   useEffect(() => {
     fetch("https://fakestoreapi.com/products")
@@ -51,8 +48,6 @@ const ProductGrid = () => {
   }, []);
   const paginatedProduct = filterProduct?.slice(firstIndex, lastIndex);
   const totalPages = Math.ceil(filterProduct.length / itemsPerPage);
-  console.log(totalPages);
-  // console.log(paginatedProduct);
 
   return (
     <section className="container mx-auto px-4 pb-16">

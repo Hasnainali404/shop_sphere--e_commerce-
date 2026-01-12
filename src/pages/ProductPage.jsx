@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 
 import {
   Star,
@@ -36,13 +36,15 @@ const ProductPage = ({ productId = 1, onBack }) => {
     <div className="min-h-screen bg-slate-50 pb-24 md:pb-12">
       {/* Navigation Breadcrumb */}
       <div className="container mx-auto px-4 py-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
-        >
-          <ArrowLeft size={20} />
-          Back to Shopping
-        </button>
+        <Link to={`/shop`}>
+          <button
+            onClick={onBack}
+            className="flex cursor-pointer items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+          >
+            <ArrowLeft size={20} />
+            Back to Shopping
+          </button>
+        </Link>
       </div>
 
       <main className="container mx-auto px-4">
