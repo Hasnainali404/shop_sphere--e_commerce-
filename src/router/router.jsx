@@ -4,6 +4,7 @@ import Home from "../pages/Home.jsx";
 import ProductPage from "../pages/ProductPage.jsx";
 import ShopPage from "../pages/shopPage.jsx";
 import LoginPage from "../pages/logipage.jsx";
+import PageNotFound from "../pages/pageNotFound.jsx";
 
 export default function AppRouter() {
   return (
@@ -15,6 +16,7 @@ export default function AppRouter() {
           <Route path="/shop/:id" element={<ProductPage />} />
         </Route>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </BrowserRouter>
   );
