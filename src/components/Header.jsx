@@ -151,7 +151,7 @@ const Header = () => {
 
             {/* Login / User Link */}
             {isLoggedIn ? (
-              <div className="flex items-center relative gap-2">
+              <div className="flex items-center relative gap-2 max-md:hidden">
                 <span
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
                   className="flex items-center gap-2 p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-600 cursor-pointer"
@@ -193,7 +193,7 @@ const Header = () => {
             ) : (
               <Link
                 to="/login"
-                className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-600 cursor-pointer"
+                className="p-2 max-md:hidden hover:bg-slate-100 rounded-full transition-colors text-slate-600 cursor-pointer"
                 aria-label="Login"
               >
                 <User size={20} />
