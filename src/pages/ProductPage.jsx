@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
-
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   Star,
   ShoppingBag,
@@ -9,167 +8,188 @@ import {
   Shield,
   Share2,
   Heart,
+  ChevronRight,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-const ProductPage = ({ productId = 1, onBack }) => {
+const ProductPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
-  const { id } = useParams();
+
   useEffect(() => {
     setLoading(true);
     fetch(`https://fakestoreapi.com/products/${id}`)
       .then((res) => res.json())
       .then((data) => {
-        // Simulating delay for skeleton demo
         setTimeout(() => {
           setProduct(data);
           setLoading(false);
         }, 600);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
       });
-  }, [productId]);
+    window.scrollTo(0, 0);
+  }, [id]);
 
-  if (loading) return <ProductSkeleton onBack={onBack} />;
+  if (loading) return <ProductSkeleton />;
+
+  if (!product) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-4">Product not found</h2>
+        <Link to="/shop" className="text-indigo-600 font-bold hover:underline">Back to Shop</Link>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 md:pb-12">
-      {/* Navigation Breadcrumb */}
-      <div className="container mx-auto px-4 py-6">
-        <Link to={`/shop`}>
-          <button
-            onClick={onBack}
-            className="flex cursor-pointer items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
-          >
-            <ArrowLeft size={20} />
-            Back to Shopping
-          </button>
-        </Link>
+    <div className="min-h-screen bg-white pb-24 md:pb-12">
+      {/* Breadcrumb Navigation */}
+      <div className="bg-slate-50 border-b border-slate-100">
+        <div className="container mx-auto px-4 py-4 flex items-center gap-2 text-sm font-medium">
+          <Link to="/" className="text-slate-400 hover:text-indigo-600 transition-colors">Home</Link>
+          <ChevronRight size={14} className="text-slate-300" />
+          <Link to="/shop" className="text-slate-400 hover:text-indigo-600 transition-colors">Shop</Link>
+          <ChevronRight size={14} className="text-slate-300" />
+          <span className="text-slate-900 truncate max-w-[200px]">{product.title}</span>
+        </div>
       </div>
 
-      <main className="container mx-auto px-4">
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-            {/* Left Column: Image Gallery */}
-            <div className="p-8 bg-gray-50 flex flex-col items-center justify-center relative">
-              <div className="relative w-full max-w-md aspect-square bg-white rounded-2xl p-8 shadow-sm flex items-center justify-center mb-6">
-                <img
-                  src={product.image}
-                  alt={product.title}
-                  className="w-full h-full object-contain mix-blend-multiply hover:scale-105 transition-transform duration-500"
-                />
-                <button className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md text-slate-400 hover:text-red-500 transition-colors">
-                  <Heart size={20} />
+      <main className="container mx-auto px-4 py-8 md:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+          {/* Left: Image Section */}
+          <div className="space-y-6">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="relative aspect-square bg-slate-50 rounded-[3rem] p-12 border border-slate-100 flex items-center justify-center group overflow-hidden"
+            >
+              <img
+                src={product.image}
+                alt={product.title}
+                className="w-full h-full object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
+              />
+              <button className="absolute top-8 right-8 w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-slate-400 hover:text-red-500 transition-all hover:scale-110">
+                <Heart size={24} />
+              </button>
+            </motion.div>
+
+            {/* Gallery Thumbnails */}
+            <div className="flex gap-4 justify-center">
+              {[0, 1, 2].map((i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveImage(i)}
+                  className={`w-24 h-24 rounded-3xl bg-slate-50 border-2 p-4 transition-all ${
+                    activeImage === i
+                      ? "border-indigo-600 shadow-xl shadow-indigo-100 scale-105"
+                      : "border-transparent hover:border-slate-200"
+                  }`}
+                >
+                  <img src={product.image} alt="" className="w-full h-full object-contain mix-blend-multiply opacity-50 group-hover:opacity-100" />
                 </button>
-              </div>
-
-              {/* Thumbnails (Simulated since API only gives 1 image) */}
-              <div className="flex gap-4 overflow-x-auto pb-2 w-full justify-center">
-                {[0, 1, 2].map((i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImage(i)}
-                    className={`w-20 h-20 rounded-xl bg-white border-2 p-2 shrink-0 transition-all ${
-                      activeImage === i
-                        ? "border-indigo-600 shadow-md"
-                        : "border-transparent hover:border-slate-200"
-                    }`}
-                  >
-                    <img
-                      src={product.image}
-                      alt="Thumbnail"
-                      className="w-full h-full object-contain mix-blend-multiply"
-                    />
-                  </button>
-                ))}
-              </div>
+              ))}
             </div>
+          </div>
 
-            {/* Right Column: Product Details */}
-            <div className="p-8 md:p-12 flex flex-col h-full">
-              <div className="mb-auto">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">
-                    {product.category}
-                  </span>
-                  <div className="flex items-center gap-1 text-amber-400 font-bold text-sm">
-                    <Star fill="currentColor" size={16} />
-                    <span>{product.rating?.rate}</span>
-                    <span className="text-slate-400 font-medium ml-1">
-                      ({product.rating?.count} reviews)
-                    </span>
-                  </div>
-                </div>
-
-                <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
-                  {product.title}
-                </h1>
-
-                <p className="text-slate-500 text-lg leading-relaxed mb-8">
-                  {product.description}
-                </p>
-
-                <div className="flex items-end gap-4 mb-8">
-                  <span className="text-4xl font-bold text-slate-900">
-                    ${product.price}
-                  </span>
-                  <span className="text-lg text-slate-400 line-through mb-1">
-                    ${(product.price * 1.2).toFixed(2)}
-                  </span>
-                  <span className="text-xs text-green-600 font-bold bg-green-100 px-2 py-1 rounded-md mb-2">
-                    Save 20%
+          {/* Right: Info Section */}
+          <div className="flex flex-col">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <span className="px-4 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-black uppercase tracking-widest rounded-full border border-indigo-100">
+                  {product.category}
+                </span>
+                <div className="flex items-center gap-1.5 text-amber-500 font-black">
+                  <Star fill="currentColor" size={18} />
+                  <span>{product.rating?.rate}</span>
+                  <span className="text-slate-400 font-bold ml-1 text-sm">
+                    ({product.rating?.count} reviews)
                   </span>
                 </div>
+              </div>
 
-                <div className="h-px w-full bg-slate-100 mb-8"></div>
+              <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-8 leading-[1.1]">
+                {product.title}
+              </h1>
 
-                {/* Features / Trust Badges */}
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <div className="flex items-center gap-3 text-sm text-slate-600">
-                    <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                      <Truck size={16} />
-                    </div>
-                    <span>Free Shipping</span>
+              <div className="flex items-baseline gap-4 mb-10">
+                <span className="text-5xl font-black text-slate-900">
+                  ${product.price}
+                </span>
+                <span className="text-xl text-slate-300 line-through font-bold">
+                  ${(product.price * 1.2).toFixed(2)}
+                </span>
+                <span className="bg-green-100 text-green-700 text-xs font-black px-3 py-1 rounded-lg uppercase tracking-wider">
+                  Save 20%
+                </span>
+              </div>
+
+              <p className="text-slate-500 text-lg leading-relaxed mb-12 font-medium">
+                {product.description}
+              </p>
+
+              {/* USP Cards */}
+              <div className="grid grid-cols-2 gap-4 mb-12">
+                <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-200">
+                    <Truck size={20} />
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-slate-600">
-                    <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                      <Shield size={16} />
-                    </div>
-                    <span>2 Year Warranty</span>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-400">Shipping</p>
+                    <p className="text-sm font-bold text-slate-900">Free Delivery</p>
+                  </div>
+                </div>
+                <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-200">
+                    <Shield size={20} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-400">Warranty</p>
+                    <p className="text-sm font-bold text-slate-900">2 Year Cover</p>
                   </div>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                <div className="flex items-center border border-slate-200 rounded-xl px-4 py-3 sm:w-auto w-full justify-between">
+              <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-slate-100">
+                <div className="flex items-center bg-slate-100 rounded-[1.5rem] p-1 sm:w-auto w-full">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="text-slate-400 hover:text-indigo-600 font-bold text-lg px-2"
+                    className="w-12 h-12 flex items-center justify-center text-slate-500 hover:text-indigo-600 font-black text-xl transition-colors cursor-pointer"
                   >
                     -
                   </button>
-                  <span className="font-bold text-slate-900 w-8 text-center">
+                  <span className="font-black text-slate-900 w-10 text-center text-lg">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="text-slate-400 hover:text-indigo-600 font-bold text-lg px-2"
+                    className="w-12 h-12 flex items-center justify-center text-slate-500 hover:text-indigo-600 font-black text-xl transition-colors cursor-pointer"
                   >
                     +
                   </button>
                 </div>
 
-                <button className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2">
-                  <ShoppingBag size={20} />
-                  Add to Cart
+                <button className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-8 rounded-[1.5rem] shadow-2xl shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-3 cursor-pointer group">
+                  <ShoppingBag size={22} className="group-hover:scale-110 transition-transform" />
+                  Add to Shopping Bag
                 </button>
 
-                <button className="p-4 border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all">
-                  <Share2 size={20} />
+                <button className="w-14 h-14 border-2 border-slate-100 rounded-[1.5rem] flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 hover:bg-indigo-50 transition-all cursor-pointer">
+                  <Share2 size={24} />
                 </button>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </main>
@@ -177,30 +197,23 @@ const ProductPage = ({ productId = 1, onBack }) => {
   );
 };
 
-// Internal Sub-component for Skeleton Loading
-const ProductSkeleton = ({ onBack }) => (
-  <div className="min-h-screen bg-slate-50 container mx-auto px-4 py-6">
-    <button
-      onClick={onBack}
-      className="flex items-center gap-2 text-slate-400 mb-6"
-    >
-      <div className="w-4 h-4 bg-slate-200 rounded"></div>
-      <div className="w-20 h-4 bg-slate-200 rounded"></div>
-    </button>
-
-    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden grid grid-cols-1 md:grid-cols-2 animate-pulse">
-      <div className="p-8 bg-gray-50 h-125 flex items-center justify-center">
-        <div className="w-3/4 h-3/4 bg-slate-200 rounded-2xl"></div>
+const ProductSkeleton = () => (
+  <div className="min-h-screen bg-white container mx-auto px-4 py-24">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 animate-pulse">
+      <div className="space-y-6">
+        <div className="aspect-square bg-slate-100 rounded-[3rem]"></div>
+        <div className="flex gap-4 justify-center">
+          {[1, 2, 3].map(i => <div key={i} className="w-24 h-24 bg-slate-100 rounded-3xl"></div>)}
+        </div>
       </div>
-      <div className="p-12 flex flex-col">
-        <div className="w-20 h-6 bg-slate-200 rounded-full mb-4"></div>
-        <div className="w-3/4 h-10 bg-slate-200 rounded-lg mb-4"></div>
-        <div className="w-full h-4 bg-slate-200 rounded-full mb-2"></div>
-        <div className="w-2/3 h-4 bg-slate-200 rounded-full mb-8"></div>
-        <div className="w-32 h-10 bg-slate-200 rounded-lg mb-8"></div>
-        <div className="mt-auto flex gap-4">
-          <div className="w-32 h-14 bg-slate-200 rounded-xl"></div>
-          <div className="flex-1 h-14 bg-slate-200 rounded-xl"></div>
+      <div className="space-y-8">
+        <div className="w-32 h-6 bg-slate-100 rounded-full"></div>
+        <div className="w-full h-16 bg-slate-100 rounded-2xl"></div>
+        <div className="w-1/2 h-12 bg-slate-100 rounded-2xl"></div>
+        <div className="w-full h-40 bg-slate-100 rounded-[2rem]"></div>
+        <div className="flex gap-4">
+          <div className="w-32 h-16 bg-slate-100 rounded-2xl"></div>
+          <div className="flex-1 h-16 bg-slate-100 rounded-2xl"></div>
         </div>
       </div>
     </div>
@@ -208,3 +221,4 @@ const ProductSkeleton = ({ onBack }) => (
 );
 
 export default ProductPage;
+
